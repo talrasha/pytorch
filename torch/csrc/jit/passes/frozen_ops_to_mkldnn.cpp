@@ -1,4 +1,3 @@
-#include <ATen/Utils.h>
 #include <ATen/Config.h>
 #include <ATen/core/interned_strings.h>
 #include <c10/core/ScalarType.h>
