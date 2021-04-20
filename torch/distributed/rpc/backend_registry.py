@@ -265,6 +265,27 @@ def _tensorpipe_init_backend_handler(store, name, rank, world_size, rpc_backend_
         # process initializes its PyTorch CUDA states.
         torch.cuda.init()
 
+        # Check local devices in device_maps and devices are all valid.
+        local_devices = set(rpc_backend_options.devices) if rpc_backend_options.devices else set()
+        for worker_name in rpc_backend_options.device_maps:
+            local_devices.update(rpc_backend_options.device_maps[worker_name].keys())
+
+        if len(local_devices) > 0 and not all([
+            max(local_devices) < torch.cuda.device_count(),
+            min(local_devices) >= 0,
+        ]):
+            raise ValueError(
+                f"Invalid device in TensorPipe options on {name}:\n"
+                f"device_maps = {rpc_backend_options.device_maps},\n"
+                f"devices = {rpc_backend_options.devices}"
+            )
+    else:
+        if len(rpc_backend_options.devices) > 0:
+            raise ValueError(
+                f"CUDA is not available on {name}, but "
+                f"devices = {rpc_backend_options.devices}"
+            )
+
     # The agent's join method is required to behave like a barrier and perform
     # collective operations, for which it relies on a process group, instead of
     # re-implementing this on top of RPCs.
