@@ -63,7 +63,8 @@ class NodeDef(NamedTuple):
 
 SUPPORTED_NODES: Dict[Type[Any], NodeDef] = {}
 
-def _register_pytree_node(typ: Any, flatten_fn: FlattenFunc, unflatten_fn: UnflattenFunc, flatten_fn_spec: Optional[FlattenFuncSpec] = None) -> None:
+def _register_pytree_node(typ: Any, flatten_fn: FlattenFunc, unflatten_fn: UnflattenFunc,
+                          flatten_fn_spec: Optional[FlattenFuncSpec] = None) -> None:
     SUPPORTED_NODES[typ] = NodeDef(flatten_fn, unflatten_fn, flatten_fn_spec)
 
 def _dict_flatten(d: Dict[Any, Any]) -> Tuple[List[Any], Context]:
@@ -177,7 +178,7 @@ def tree_unflatten(values: List[Any], spec: TreeSpec) -> PyTree:
 
     return unflatten_fn(child_pytrees, spec.context)
 
-def tree_map(pytree: PyTree, fn):
+def tree_map(pytree: PyTree, fn: Callable) -> PyTree:
     flat_args, spec = tree_flatten(pytree)
     return tree_unflatten([fn(i) for i in flat_args], spec)
 
